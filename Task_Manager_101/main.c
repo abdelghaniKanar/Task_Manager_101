@@ -67,7 +67,7 @@ void displayTask(int checker, task tasks[]);
 void updateTask(int checker, task tasks[]);
 
 //Declaring the "deleteTask" function
-void deleteTask();
+void deleteTask(int checker, task tasks[]);
 
 int main()
 {
@@ -193,6 +193,13 @@ void menu()
             {
 
                 printf("%s\nOops! There is no task to remove!\n%s", AC_RED, AC_WHITE);
+
+            }
+            else
+            {
+
+
+                deleteTask( checker, tasks);
 
             }
             break;
@@ -799,3 +806,105 @@ void updateTask(int checker, task tasks[])
 
 }
 
+
+//The 'deleteTAsk' function is used to delete tasks details
+void deleteTask(int checker, task tasks[])
+{
+    int remember;
+    int lengthListDeletedTasks;
+    printf("\n---------------------------------------------------");
+    printf("\n------ Welcome! to the delet task section -------\n");
+
+    do
+    {
+
+        printf("\nIf you don't remember,\nenter '0' to display your list of tasks.\nIf you do remember,\nenter '1' to continue the deletion process: ");
+        scanf("%d", &remember);
+
+    }
+    while(remember != 0 && remember != 1);
+
+    if (remember == 0)
+    {
+
+        displayTask(checker, tasks);
+
+    }
+    else
+    {
+
+        do
+        {
+
+            printf("Please enter how many tasks you want to remove?: ");
+            scanf("%d", &lengthListDeletedTasks);
+
+        }
+        while(lengthListDeletedTasks == 0 || lengthListDeletedTasks > checker);
+
+
+        //will store the list number of deleted tasks
+        int listDeletedTasks[lengthListDeletedTasks];
+
+        for(int i = 0; i < lengthListDeletedTasks; i++)
+        {
+
+            do
+            {
+
+                printf("Please enter task list number: ");
+                scanf("%d", &listDeletedTasks[i]);
+
+            }
+            while(listDeletedTasks[i] == 0 || listDeletedTasks[i] > checker);
+
+        }
+
+
+        printf("\n----------------------------------------------------------------");
+        printf("\n--------Are you sure you want to delete these tasks?-----------\n");
+
+        for(int i = 0; i < lengthListDeletedTasks; i++)
+        {
+
+            printf("\n------------------ Task number %d -------------------\n", listDeletedTasks[i]);
+
+            printf("\n1. This task title: %s", tasks[listDeletedTasks[i]-1].title);
+            printf("\n2. %s\'s description: %s", tasks[listDeletedTasks[i]-1].title, tasks[listDeletedTasks[i]-1].description);
+            printf("\n3. %s\'s priority: %s", tasks[listDeletedTasks[i]-1].title, tasks[listDeletedTasks[i]-1].priority);
+            printf("\n%s\'s due date: %d-%d-%d\n", tasks[listDeletedTasks[i]-1].title, tasks[listDeletedTasks[i]-1].dueDate.day, tasks[listDeletedTasks[i]-1].dueDate.month, tasks[listDeletedTasks[i]-1].dueDate.year);
+
+        }
+
+        int com;
+        printf("\n----------------------------------------------------------------");
+        printf("\n----------------Please enter \'1\' to confirm or \'0\' to cancel: ");
+        scanf("%d", &com);
+
+        if(com == 1)
+        {
+
+            for(int i = 0; i < lengthListDeletedTasks; i++)
+            {
+                strcpy(tasks[listDeletedTasks[i]-1].title, " ");
+                strcpy(tasks[listDeletedTasks[i]-1].description, " ");
+                strcpy(tasks[listDeletedTasks[i]-1].priority, " ");
+                tasks[listDeletedTasks[i]-1].dueDate.year = 0;
+                tasks[listDeletedTasks[i]-1].dueDate.month = 0;
+                tasks[listDeletedTasks[i]-1].dueDate.day = 0;
+
+                printf("\n------------------ Task number %d -------------------\n", listDeletedTasks[i]);
+
+                printf("\n1. This task title: %s", tasks[listDeletedTasks[i]-1].title);
+                printf("\n2. %s\'s description: %s", tasks[listDeletedTasks[i]-1].title, tasks[listDeletedTasks[i]-1].description);
+                printf("\n3. %s\'s priority: %s", tasks[listDeletedTasks[i]-1].title, tasks[listDeletedTasks[i]-1].priority);
+                printf("\n%s\'s due date: %d-%d-%d\n", tasks[listDeletedTasks[i]-1].title, tasks[listDeletedTasks[i]-1].dueDate.day, tasks[listDeletedTasks[i]-1].dueDate.month, tasks[listDeletedTasks[i]-1].dueDate.year);
+
+
+            }
+        }
+
+
+    }
+
+}
