@@ -594,7 +594,7 @@ void addMultiTasks(int numberTasks)
 }
 
 
-//The displayTask function is used to display tasks details at once or applying a filter
+//The 'displayTask' function is used to display tasks details at once or applying a filter
 void displayTask(int checker, task tasks[])
 {
 
@@ -700,10 +700,102 @@ void displayTask(int checker, task tasks[])
 }
 
 
-void updateTask(int checker, task tasks[]){
+//The 'updateTask' function is used to update tasks details
+void updateTask(int checker, task tasks[])
+{
+    int taskNumber, update;
 
     printf("\n---------------------------------------------------");
     printf("\n------ Welcome! to the update task section -------\n");
+
+    do
+    {
+
+        printf("\nPlease enter the list number of the task you want to update");
+        printf("\nIf you don't remember,\nenter '0' to display your list and choose a task: ");
+        scanf("%d", &taskNumber);
+
+        if(taskNumber == 0)
+        {
+
+            displayTask(checker, tasks);
+
+        }
+
+    }
+    while( taskNumber < 1 || taskNumber > LIST_LENGTH );
+
+    for(int i = 0; i < checker; i++)
+    {
+
+        if (i == (taskNumber - 1))
+        {
+
+
+            printf("\n------------------Task number %d-------------------\n", i + 1);
+
+            printf("\n1. This task title: %s", tasks[i].title);
+            printf("\n2. %s\'s description: %s", tasks[i].title, tasks[i].description);
+            printf("\n3. %s\'s priority: %s", tasks[i].title, tasks[i].priority);
+            printf("\n4. %s\'s due year: %d\n", tasks[i].title, tasks[i].dueDate.year);
+            printf("\n5. %s\'s due month: %d\n", tasks[i].title, tasks[i].dueDate.month);
+            printf("\n6. %s\'s due day: %d\n", tasks[i].title, tasks[i].dueDate.day);
+
+            do
+            {
+
+                printf("\n\nPlease chose one number to specify what you want to update: ");
+                scanf("%d", &update);
+
+            }
+            while( update < 1 || update > 6);
+
+            switch (update)
+            {
+
+            case 1:
+
+                printf("\nPlease enter the new task title: ");
+                scanf("%s", &tasks[i].title);
+                break;
+
+            case 2:
+
+                printf("\nPlease enter the new task description: ");
+                scanf("%s", &tasks[i].description);
+                break;
+
+            case 3:
+
+                printf("\nPlease enter the new task priority: ");
+                scanf("%s", &tasks[i].priority);
+                break;
+
+            case 4:
+
+                printf("\nPlease enter the new task due year: ");
+                scanf("%s", &tasks[i].dueDate.year);
+                break;
+
+            case 5:
+
+                printf("\nPlease enter the new task due month: ");
+                scanf("%s", &tasks[i].dueDate.month);
+                break;
+
+            case 6:
+
+                printf("\nPlease enter the new task due day: ");
+                scanf("%s", &tasks[i].dueDate.day);
+                break;
+
+            };
+
+            break;
+
+        }
+
+    }
 
 }
 
