@@ -1,7 +1,8 @@
 # depslib dependency file v1.0
-1730295764 source:c:\users\abdel_dtm3iz7\documents\c programs\sas final project\task_manager_101\main.c
+1730392170 source:c:\users\abdel_dtm3iz7\documents\c programs\sas final project\task_manager_101\main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<ctype.h>
+	<stdbool.h>
 
