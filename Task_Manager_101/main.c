@@ -58,13 +58,13 @@ void addTask();
 void addMultiTasks(int numberTasks);
 
 //Declaring the "displayTask" function
-void displayTask(int numberTasks);
+void displayTask(int checker, task tasks[]);
 
 //Declaring the "filter" function to be used within "displayTask" for full display features
-void filter();
+//void filter();
 
 //Declaring the "updateTask" function
-void updateTask();
+void updateTask(int checker, task tasks[]);
 
 //Declaring the "deleteTask" function
 void deleteTask();
@@ -165,6 +165,12 @@ void menu()
 
 
             }
+            else
+            {
+
+                displayTask(checker, tasks);
+
+            }
             break;
 
         case 'U':
@@ -172,6 +178,12 @@ void menu()
             {
 
                 printf("%s\nOops! There is no task to update!\n%s", AC_RED, AC_WHITE);
+
+            }
+            else
+            {
+
+                updateTask(checker, tasks);
 
             }
             break;
@@ -580,3 +592,118 @@ void addMultiTasks(int numberTasks)
     }
 
 }
+
+
+//The displayTask function is used to display tasks details at once or applying a filter
+void displayTask(int checker, task tasks[])
+{
+
+    printf("\n---------------------------------------------------");
+    printf("\n------ Welcome! to the display task section -------\n");
+
+    //Filter section
+    char filter[6];
+    char priorityFilter[4];
+    do
+    {
+        printf("\nDo you want to show all tasks or use a filter?");
+        printf("\nType 'filter' to apply a filter,\nor 'skip' to see all tasks: ");
+        scanf("%s", &filter);
+        if(strcmp(strupr(filter), "FILTER") != 0 && strcmp(strupr(filter), "SKIP") != 0)
+        {
+
+            printf("%s\nOops! Enter a valid value!\n%s", AC_RED, AC_WHITE);
+
+        }
+    }
+    while( strcmp(strupr(filter), "FILTER") != 0 && strcmp(strupr(filter), "SKIP") != 0 );
+
+    if(strcmp(strupr(filter), "SKIP") == 0)
+    {
+
+        for(int i = 0; i < checker; i++)
+        {
+
+            printf("\n------------------- Task Number %d -----------------\n", i + 1);
+
+            printf("\nThis task title: %s", tasks[i].title);
+            printf("\n%s\'s description: %s", tasks[i].title, tasks[i].description);
+            printf("\n%s\'s priority: %s", tasks[i].title, tasks[i].priority);
+            printf("\n%s\'s due date: %d-%d-%d\n", tasks[i].title, tasks[i].dueDate.day, tasks[i].dueDate.month, tasks[i].dueDate.year);
+
+        }
+
+    }
+    else
+    {
+
+        do
+        {
+            printf("\nCurrently, filtering is available by priority only!!\n");
+            printf("\nType 'high' to display only high-priority tasks,\nor 'low' to show only low-priority tasks: ");
+            scanf("%s", &priorityFilter);
+            if(strcmp(strupr(priorityFilter), "HIGH") != 0 && strcmp(strupr(priorityFilter), "LOW") != 0)
+            {
+
+                printf("%s\nOops! Enter a valid value!\n%s", AC_RED, AC_WHITE);
+
+            }
+        }
+        while( strcmp(strupr(priorityFilter), "HIGH") != 0 && strcmp(strupr(priorityFilter), "LOW") != 0 );
+
+        if(strcmp(strupr(priorityFilter), "HIGH") == 0)
+        {
+
+            for(int i = 0; i < checker; i++)
+            {
+                if (strcmp(tasks[i].priority, "HIGH") == 0)
+                {
+
+
+                    printf("\n------------------- Task Number %d -----------------\n", i + 1);
+
+                    printf("\nThis task title: %s", tasks[i].title);
+                    printf("\n%s\'s description: %s", tasks[i].title, tasks[i].description);
+                    printf("\n%s\'s priority: %s", tasks[i].title, tasks[i].priority);
+                    printf("\n%s\'s due date: %d-%d-%d\n", tasks[i].title, tasks[i].dueDate.day, tasks[i].dueDate.month, tasks[i].dueDate.year);
+
+                }
+
+            }
+
+        }
+        else
+        {
+
+
+            for(int i = 0; i < checker; i++)
+            {
+                if (strcmp(tasks[i].priority, "LOW") == 0)
+                {
+
+
+                    printf("\n------------------- Task Number %d -----------------\n", i + 1);
+
+                    printf("\nThis task title: %s", tasks[i].title);
+                    printf("\n%s\'s description: %s", tasks[i].title, tasks[i].description);
+                    printf("\n%s\'s priority: %s", tasks[i].title, tasks[i].priority);
+                    printf("\n%s\'s due date: %d-%d-%d\n", tasks[i].title, tasks[i].dueDate.day, tasks[i].dueDate.month, tasks[i].dueDate.year);
+
+                }
+
+            }
+
+        }
+
+    }
+
+}
+
+
+void updateTask(int checker, task tasks[]){
+
+    printf("\n---------------------------------------------------");
+    printf("\n------ Welcome! to the update task section -------\n");
+
+}
+
