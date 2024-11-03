@@ -3,6 +3,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+//<time.h> is included for time-related functions such as localtime and time
+#include <time.h>
 
 //colors
 #define AC_BLACK "\x1b[30m"
@@ -10,22 +12,17 @@
 #define AC_WHITE "\x1b[37m"
 
 
-//Declaring the Global Variables
+//Declaring the Global Constants
 
 //Using `LIST_LENGTH` with a default value of 100 to allow handling 100 tasks as maximum
 //If the application needs to manage more tasks, consider using dynamic memory allocation to adjust the array size
 //At the moment, it's not an important part of the code
+
 #define LIST_LENGTH 3
 #define TITLE_LENGTH 25
 #define DESCRIPTION_LENGTH 350
 
-//checker is used to verify if any tasks have been added
-int checker = 0;
-char singleTask[4];
-int numberTasks;
-
-
-//Define the date structure to be used as a nested structure.
+//Define the date structure to be used as a nested structure
 typedef struct
 {
 
@@ -46,26 +43,32 @@ typedef struct
 
 } task;
 
+//Declaring Global Variables
+
 //Declaring an array of task
 task tasks[LIST_LENGTH];
+//To count how many task added
+int checker = 0;
+//Used to store an integer value before checking
+char stringInt[4];
 
+//Declaring Functions
 
 //Declaring the "menu" function
 void menu();
-
-//Declaring the "addTask" function
+//Declaring 'validateInteger' function
+int validateInteger(char stringInt[4]);
+//Declaring the "addTask" function and its Support team
 void addTask();
-void addMultiTasks(int numberTasks);
-
+void addMultiTasksSupport(int numberTasks);
+void addTaskSupport();
+bool validateDate(int month, int day, int year);
 //Declaring the "displayTask" function
 void displayTask(int checker, task tasks[]);
-
 //Declaring the "filter" function to be used within "displayTask" for full display features
 //void filter();
-
 //Declaring the "updateTask" function
 void updateTask(int checker, task tasks[]);
-
 //Declaring the "deleteTask" function
 void deleteTask(int checker, task tasks[]);
 
@@ -79,6 +82,8 @@ int main()
 
     return 0;
 }
+
+//Defining Functions
 
 //'menu' function controls user actions
 void menu()
@@ -99,62 +104,13 @@ void menu()
         printf("\nPlease enter your choice: ");
         scanf("%s", &choice);
 
-        //Here is the verification section to verify the user's chosen option
+        //Verify user input option
         switch (toupper(choice))
         {
 
         case 'A':
-            //manupulating addTask function
-            //If 'checker' less then LIST_LENGTH
-            if(checker < LIST_LENGTH)
-            {
-                do
-                {
-
-                    printf("\nDo you want to add one or more tasks?\nEnter \"one\" or \"more\": ");
-                    scanf("%s", &singleTask);
-
-                    strcpy(singleTask, strupr(singleTask));
-
-                    if(strcmp(singleTask, "ONE") != 0 && strcmp(singleTask, "MORE") != 0)
-                    {
-
-                        printf("%s\nYou enter invalid value!!!\n%s", AC_RED, AC_WHITE);
-
-                    }
-                    else if(strcmp(singleTask, "ONE") == 0)
-                    {
-
-                        addTask();
-
-                    }
-                    else if(strcmp(singleTask, "MORE") == 0)
-                    {
-                        do
-                        {
-
-                            printf("\nHow many tasks would you like to add?\n(Limit is %d): ", (LIST_LENGTH - checker));
-                            scanf("%d", &numberTasks);
-
-                        }
-                        while((LIST_LENGTH - checker) < numberTasks);
-
-
-                        addMultiTasks(numberTasks);
-
-
-                    }
-
-                }
-                while(strcmp(singleTask, "ONE") != 0 && strcmp(singleTask, "MORE") != 0);
-
-            }
-            else
-            {
-
-                printf("%s\nThe maximum limit has been reached!!!\n%s", AC_RED, AC_WHITE);
-
-            }
+            //Manipulating addTask Section
+            addTask();
             break;
 
         case 'D':
@@ -206,400 +162,300 @@ void menu()
 
         case 'O':
             break;
-
-
         }
-
     }
     while (toupper(choice) != 'O');
-
 }
 
-//'addTask' function is responsible for receiving user inputs for task details and validating these inputs
+//'addTask' function is used to control addTask process flow
 void addTask()
 {
-    int inputChecker;
-    printf("\n---------------------------------------------------");
-    printf("\n-------- Welcome! to the add task section ---------");
-    printf("\n------------------- Task Number %d -----------------\n", checker + 1);
+    //`static` keeps `singleTask` and `numberTasks` values between calls,
+    //avoiding repeated creation each time `addTask()` runs
+    //This approach is more efficient than global scope, as it limits access to within the function
 
+    //Used to store user choice
+    static char singleTask[4];
+    static int numberTasks;
+    //If 'checker' less then LIST_LENGTH means that still have empty spots
+    if(checker < LIST_LENGTH)
+    {
+        do
+        {
+            //To choose calling 'addTaskSupport' or 'addMultiTasksSupport'
+            printf("\nDo you want to add one or more tasks?\nEnter \"one\" or \"more\": ");
+            scanf("%s", &singleTask);
+            //To avoid case sensitivity
+            strcpy(singleTask, strupr(singleTask));
+            if(strcmp(singleTask, "ONE") != 0 && strcmp(singleTask, "MORE") != 0)
+            {
+                printf("%s\nYou enter invalid value!!!\n%s", AC_RED, AC_WHITE);
+            }
+            else if(strcmp(singleTask, "ONE") == 0)
+            {
+                addTaskSupport();
+                break;
+            }
+            else if(strcmp(singleTask, "MORE") == 0)
+            {
+                // Checking if the use enter a valid value,
+                // '(LIST_LENGTH - checker)' to get how many spots still free,
+                // and validate user input
+                do
+                {
+                    printf("\nHow many tasks would you like to add?\n(Limit is %d): ", (LIST_LENGTH - checker));
+                    scanf("%s", &stringInt);
+                    numberTasks = validateInteger(stringInt);
+                    if (numberTasks != 0)
+                    {
+                        if (numberTasks > (LIST_LENGTH - checker))
+                        {
+                            printf("%s\nOnly %d spots left!\n%s", AC_RED, (LIST_LENGTH - checker), AC_WHITE);
+                        }
+                        else break;
+                    }
+                }
+                while(true);
+                addMultiTasksSupport(numberTasks);
+                break;
+            }
+        }
+        while(true);
+    }
+    else
+    {
+        //If 'checker' equals LIST_LENGTH, it means there are no available space left
+        printf("%s\nThe maximum limit has been reached!!!\n%s", AC_RED, AC_WHITE);
+    }
+}
+
+//'addMultiTasksSupport' function is used to receive multiple task details at once
+void addMultiTasksSupport(int numberTasks)
+{
+    for(int i = 0; i < numberTasks; i++)
+    {
+        addTaskSupport();
+    }
+}
+
+//'addTaskSupport' function collects and validates user input for task details
+void addTaskSupport()
+{
+    //Used to store string date value before checking
+    static char stringDay[2], stringMonth[2],stringYear[4];
+    static int integerChecker;
+    static bool inputChecker = true;//used in conditions validation
+    printf("\n---------------------------------------------------");
+    printf("\n-------- Welcome! to the add task section ---------\n");
+    printf("\n------------------- Task Number %d -----------------\n", checker + 1);
+    //Getting task title
     do
     {
         printf("\nPlease enter this task title (only 25 char): ");
         scanf(" %[^\n]", &tasks[checker].title);
-        inputChecker = strlen(tasks[checker].title);
-
-        if (inputChecker > TITLE_LENGTH)
+        if (strlen(tasks[checker].title) > TITLE_LENGTH)
         {
             printf("%s\nThe title must be 25 characters or fewer!%s", AC_RED, AC_WHITE);
         }
-
+        else break;
     }
-    while(inputChecker > TITLE_LENGTH);
-
-
+    while(true);
+    //Getting task description
     do
     {
-
         printf("Please enter %s\'s task description:\n", tasks[checker].title);
         scanf(" %[^\n]", &tasks[checker].description);
-        inputChecker = strlen(tasks[checker].description);
-
-        if (inputChecker > DESCRIPTION_LENGTH)
+        if (strlen(tasks[checker].description) > DESCRIPTION_LENGTH)
         {
             printf("%s\nThe description must be 350 characters or fewer!%s", AC_RED, AC_WHITE);
         }
-
+        else break;
     }
-    while(inputChecker > DESCRIPTION_LENGTH);
-
+    while(true);
+    //Getting task priority
     do
     {
-
         printf("\nPlease enter %s\'s task priority (low or high): ", tasks[checker].title);
-        scanf(" %[^\n]", &tasks[checker].priority);
+        scanf("%s", &tasks[checker].priority);
+        //To avoid case sensitivity
+        strcpy(tasks[checker].priority, strupr(tasks[checker].priority));
 
-        if(strcmp(strupr(tasks[checker].priority), "LOW") != 0 && strcmp(strupr(tasks[checker].priority), "HIGH") != 0)
+        if(strcmp(tasks[checker].priority, "LOW") != 0 && strcmp(tasks[checker].priority, "HIGH") != 0)
         {
-            inputChecker = 1;
             printf("%s\nThe task priority must be (low or high)!\n%s", AC_RED, AC_WHITE);
 
         }
-        else inputChecker = 0;
+        else break;
 
     }
-    while(inputChecker);
-
-
-    bool leap;
-    printf("\nPlease enter %s\'s task due date:\n", tasks[checker].title);
-
+    while(true);
+    //Getting task due date
     do
     {
-
-        printf("Enter a valid year: ");
-        scanf("%d", &tasks[checker].dueDate.year);
-        //A leap year contains 366 days
-        if(tasks[checker].dueDate.year >= 2024)
+        printf("\nPlease enter %s\'s task due date.\n", tasks[checker].title);
+        //checking user inputs type digit or not
+        do
         {
-
-            if(tasks[checker].dueDate.year % 4 == 0)
-            {
-
-                if((tasks[checker].dueDate.year % 100 == 0) && (tasks[checker].dueDate.year % 400 == 0))
-                {
-
-                    leap = true;
-
-                }
-                else if((tasks[checker].dueDate.year % 100 == 0) && (tasks[checker].dueDate.year % 400 != 0))
-                {
-
-                    leap = false;
-
-                }
-                else
-                {
-
-                    leap = true;
-
-                }
-
-
-
+            printf("Day: ");
+            scanf("%s", &stringDay);
+            integerChecker = validateInteger(stringDay);
+            if(integerChecker != 0){
+                tasks[checker].dueDate.day = integerChecker;
+                break;
             }
-            else
-            {
 
+        }while(true);
+
+        do
+        {
+            printf("Month: ");
+            scanf("%s", &stringMonth);
+            integerChecker = validateInteger(stringMonth);
+            if(integerChecker != 0){
+                tasks[checker].dueDate.month = integerChecker;
+                break;
+            }
+
+        }while(true);
+
+        do
+        {
+            printf("Year: ");
+            scanf("%s", &stringYear);
+            integerChecker = validateInteger(stringYear);
+            if(integerChecker != 0){
+                tasks[checker].dueDate.year = integerChecker;
+                break;
+            }
+
+        }while(true);
+        //Validate due date with 'validateDate' function
+        inputChecker = validateDate(tasks[checker].dueDate.month, tasks[checker].dueDate.day, tasks[checker].dueDate.year);
+        if(inputChecker == true)
+        {
+            printf("%s\nThe due date is invalid, Please try to enter a valid date!\n%s", AC_RED, AC_WHITE);
+        }
+    }
+    while(inputChecker);
+    checker ++;
+}
+
+//'validateDate'function use to validate due date
+bool validateDate(month, day, year)
+{
+    static bool inputChecker = true;
+    static bool leap;
+    //Get current time in seconds
+    //This line declares a variable t of type time_t
+    //and assigns it the current time in seconds since the Unix epoch (00:00:00 UTC on 1 January 1900)
+    //The time() function from the <time.h> header is used for this purpose
+    time_t t = time(NULL);
+    //This line converts the current time (t) to the local time representation
+    //and stores it in a struct tm object named currentTime
+    //The localtime() function from the <time.h> header is used for this conversion
+    struct tm *currentTime = localtime(&t);
+    //This line prints the current date and time in a human-readable format
+    //The format specifier %02d ensures that each component (day, month, year, hour, minute, second) is printed with leading zeros if necessary
+    //The values are extracted from the currentTime structure using its members (tm_mday, tm_mon, tm_year, tm_hour, tm_min, tm_sec)
+    //Note that tm_mon represents the month (0-11), so we add 1 to it to get the actual month
+    //printf("\nCurrent Date and Time: %02d/%02d/%04d\n", currentTime->tm_mday, currentTime->tm_mon + 1, currentTime->tm_year + 1900);
+
+    //Checking if the user due date is valid
+    if(month >= currentTime->tm_mon + 1 && day >= currentTime->tm_mday && year >= currentTime->tm_year + 1900)
+    {
+        //check if a year is a leap year or not
+        if(year % 4 == 0)
+        {
+            if((year % 100 == 0) && (year % 400 == 0))
+            {
+                leap = true;
+            }
+            else if((year % 100 == 0) && (year % 400 != 0))
+            {
                 leap = false;
-
             }
-
-            inputChecker = 0;
-
+            else leap = true;
         }
-        else
+        else leap = false;
+
+        //month validation
+        if(month >= 1 && month <= 12)
         {
-
-            inputChecker = 1;
-            printf("%s\nThe year must be 2024 or later!\n\n%s", AC_RED, AC_WHITE);
-
+            inputChecker = false;
         }
+        else inputChecker = true;
 
-    }
-    while(inputChecker);
-
-
-    do
-    {
-
-        printf("Enter a valid month: ");
-        scanf("%d", &tasks[checker].dueDate.month);
-        if(tasks[checker].dueDate.month >= 1 && tasks[checker].dueDate.month <= 12)
+        //day validation
+        if(day >= 1 && day <= 31)
         {
-
-            inputChecker = 0;
-
-        }
-        else
-        {
-            inputChecker = 1;
-            printf("%s\nThe month must be between 1 and 12!\n\n%s", AC_RED, AC_WHITE);
-        }
-
-    }
-    while(inputChecker);
-
-
-
-
-    do
-    {
-
-        printf("Enter a valid day: ");
-        scanf("%d", &tasks[checker].dueDate.day);
-
-        switch(tasks[checker].dueDate.month)
-        {
-
-        case 1:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 31)
-            {
-
-                inputChecker = 0;
-
-            }
-            else
-            {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 31!\n\n%s", AC_RED, AC_WHITE);
-            }
-
-            break;
-
-        case 2:
-
             if(leap == true)
             {
-
-                if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 29)
+                if(month == 2)
                 {
-
-                    inputChecker = 0;
+                    if(day <= 29)
+                    {
+                        inputChecker = false;
+                    }
+                    else inputChecker = true;
 
                 }
-                else
+                else if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10  || month == 12)
                 {
-                    inputChecker = 1;
-                    printf("%s\nThe day must be between 1 and 29!\n\n%s", AC_RED, AC_WHITE);
-                }
-
-            }
-            else
-            {
-
-                if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 28)
-                {
-
-                    inputChecker = 0;
+                    if(day <= 31)
+                    {
+                        inputChecker = false;
+                    }
+                    else inputChecker = true;
 
                 }
-                else
+                else if (month == 4 || month == 6 || month == 9 || month == 11)
                 {
-                    inputChecker = 1;
-                    printf("%s\nThe day must be between 1 and 28!\n\n%s", AC_RED, AC_WHITE);
+                    if(day <= 30)
+                    {
+                        inputChecker = false;
+                    }
+                    else inputChecker = true;
                 }
             }
-
-            break;
-
-        case 3:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 31)
-            {
-
-                inputChecker = 0;
-
-            }
             else
             {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 31!\n\n%s", AC_RED, AC_WHITE);
+                if(month == 2)
+                {
+                    if(day <= 28)
+                    {
+                        inputChecker = false;
+                    }
+                    else inputChecker = true;
+
+                }
+                else if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10  || month == 12)
+                {
+                    if(day <= 31)
+                    {
+                        inputChecker = false;
+                    }
+                    else inputChecker = true;
+
+                }
+                else if (month == 4 || month == 6 || month == 9 || month == 11)
+                {
+                    if(day <= 30)
+                    {
+                        inputChecker = false;
+                    }
+                    else inputChecker = true;
+                }
             }
-
-            break;
-
-        case 4:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 30)
-            {
-
-                inputChecker = 0;
-
-            }
-            else
-            {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 30!\n\n%s", AC_RED, AC_WHITE);
-            }
-
-            break;
-
-        case 5:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 31)
-            {
-
-                inputChecker = 0;
-
-            }
-            else
-            {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 31!\n\n%s", AC_RED, AC_WHITE);
-            }
-
-            break;
-
-        case 6:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 30)
-            {
-
-                inputChecker = 0;
-
-            }
-            else
-            {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 30!\n\n%s", AC_RED, AC_WHITE);
-            }
-
-            break;
-
-        case 7:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 31)
-            {
-
-                inputChecker = 0;
-            }
-
-            else
-            {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 31!\n\n%s", AC_RED, AC_WHITE);
-            }
-
-            break;
-
-        case 8:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 31)
-            {
-
-                inputChecker = 0;
-
-            }
-            else
-            {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 31!\n\n%s", AC_RED, AC_WHITE);
-            }
-
-            break;
-
-        case 9:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 30)
-            {
-
-                inputChecker = 0;
-
-            }
-            else
-            {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 30!\n\n%s", AC_RED, AC_WHITE);
-            }
-
-            break;
-
-        case 10:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 31)
-            {
-
-                inputChecker = 0;
-
-            }
-            else
-            {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 31!\n\n%s", AC_RED, AC_WHITE);
-            }
-
-            break;
-
-        case 11:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 30)
-            {
-
-                inputChecker = 0;
-
-            }
-            else
-            {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 30!\n\n%s", AC_RED, AC_WHITE);
-            }
-
-            break;
-
-        case 12:
-
-            if(tasks[checker].dueDate.day >= 1 && tasks[checker].dueDate.day <= 31)
-            {
-
-                inputChecker = 0;
-
-            }
-            else
-            {
-                inputChecker = 1;
-                printf("%s\nThe day must be between 1 and 31!\n\n%s", AC_RED, AC_WHITE);
-            }
-
-            break;
-
-        default:
-            break;
 
         }
+        else inputChecker = true;
 
     }
-    while(inputChecker);
+    else inputChecker = true;
 
-
-    checker ++;
-
-}
-
-//The addMultiTasks function is used to receive multiple task details at once
-void addMultiTasks(int numberTasks)
-{
-
-    for(int i = 0; i < numberTasks; i++)
-    {
-
-        addTask();
-
-    }
+    return inputChecker;
 
 }
-
 
 //The 'displayTask' function is used to display tasks details at once or applying a filter
 void displayTask(int checker, task tasks[])
@@ -907,4 +763,21 @@ void deleteTask(int checker, task tasks[])
 
     }
 
+}
+
+
+//'validateInteger' function, check if a string contain only digits or not
+int validateInteger(char stringInt[])
+{
+    //get string length, to loop over its chars and check them if they are digits or not
+    for(int i = 0; i < strlen(stringInt); i++)
+    {
+        if(!isdigit(stringInt[i]))
+        {
+            printf("%s\nPlease enter digits only!\n%s", AC_RED, AC_WHITE);
+            return 0;
+        }
+    }
+    //converting string to int
+    return atoi(stringInt);
 }
