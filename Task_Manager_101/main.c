@@ -25,21 +25,18 @@
 //Define the date structure to be used as a nested structure
 typedef struct
 {
-
     int day, month, year;
-
 } date;
 
 //Define the main structure "task"
 typedef struct
 {
     char title[TITLE_LENGTH]; //25 characters for title, it's enough!!!
-
     char description[DESCRIPTION_LENGTH]; //Expect the description to contain 350 characters or fewer
-
-    char priority[4]; //High or low.
-
+    char priority[4]; //High or low
     date dueDate; //The dueDate is the date on which the user expects this task to be completed
+    //Bonus
+    char status[10]; //complete or incomplete
 
 } task;
 
@@ -59,18 +56,22 @@ void menu();
 //Declaring 'validateInteger' function
 int validateInteger(char stringInt[4]);
 //Declaring the "addTask" function and its Support team
+void add();
 void addTask();
 void addMultiTasksSupport(int numberTasks);
-void addTaskSupport();
-bool validateDate(int month, int day, int year);
+bool validateDate(int day, int month, int year);
+bool validateDateSupport(int day, int month, int year);
 //Declaring the "displayTask" function
-void displayTask(int checker, task tasks[]);
+void display();
+void displayOption();
+void displayTask(int i);
 //Declaring the "filter" function to be used within "displayTask" for full display features
-//void filter();
+void filterSupport(char filter);
+
 //Declaring the "updateTask" function
-void updateTask(int checker, task tasks[]);
+//void updateTask(int checker, task tasks[]);
 //Declaring the "deleteTask" function
-void deleteTask(int checker, task tasks[]);
+//void deleteTask(int checker, task tasks[]);
 
 int main()
 {
@@ -110,23 +111,12 @@ void menu()
 
         case 'A':
             //Manipulating addTask Section
-            addTask();
+            add();
             break;
 
         case 'D':
-            if(checker == 0)
-            {
-
-                printf("%s\nOops! There is no task to display!\n%s", AC_RED, AC_WHITE);
-
-
-            }
-            else
-            {
-
-                displayTask(checker, tasks);
-
-            }
+            //Manipulating displayTask Section
+            display();
             break;
 
         case 'U':
@@ -167,8 +157,8 @@ void menu()
     while (toupper(choice) != 'O');
 }
 
-//'addTask' function is used to control addTask process flow
-void addTask()
+//'add' function is used to control addTask process flow
+void add()
 {
     //`static` keeps `singleTask` and `numberTasks` values between calls,
     //avoiding repeated creation each time `addTask()` runs
@@ -193,7 +183,7 @@ void addTask()
             }
             else if(strcmp(singleTask, "ONE") == 0)
             {
-                addTaskSupport();
+                addTask();
                 break;
             }
             else if(strcmp(singleTask, "MORE") == 0)
@@ -229,17 +219,8 @@ void addTask()
     }
 }
 
-//'addMultiTasksSupport' function is used to receive multiple task details at once
-void addMultiTasksSupport(int numberTasks)
-{
-    for(int i = 0; i < numberTasks; i++)
-    {
-        addTaskSupport();
-    }
-}
-
-//'addTaskSupport' function collects and validates user input for task details
-void addTaskSupport()
+//'addTask' function collects and validates user input for task details
+void addTask()
 {
     //Used to store string date value before checking
     static char stringDay[2], stringMonth[2],stringYear[4];
@@ -272,6 +253,21 @@ void addTaskSupport()
         else break;
     }
     while(true);
+    //Getting task status
+    do
+    {
+        printf("\nPlease enter %s\'s task status (complete or incomplete): ", tasks[checker].title);
+        scanf("%s", &tasks[checker].status);
+        //To avoid case sensitivity
+        strcpy(tasks[checker].status, strupr(tasks[checker].status));
+
+        if(strcmp(tasks[checker].status, "COMPLETE") != 0 && strcmp(tasks[checker].status, "INCOMPLETE") != 0)
+        {
+            printf("%s\nThe task priority must be (complete or incomplete)!\n%s", AC_RED, AC_WHITE);
+
+        }else break;
+    }
+    while(true);
     //Getting task priority
     do
     {
@@ -286,9 +282,9 @@ void addTaskSupport()
 
         }
         else break;
-
     }
     while(true);
+
     //Getting task due date
     do
     {
@@ -299,52 +295,67 @@ void addTaskSupport()
             printf("Day: ");
             scanf("%s", &stringDay);
             integerChecker = validateInteger(stringDay);
-            if(integerChecker != 0){
+            if(integerChecker != 0)
+            {
                 tasks[checker].dueDate.day = integerChecker;
                 break;
             }
 
-        }while(true);
+        }
+        while(true);
 
         do
         {
             printf("Month: ");
             scanf("%s", &stringMonth);
             integerChecker = validateInteger(stringMonth);
-            if(integerChecker != 0){
+            if(integerChecker != 0)
+            {
                 tasks[checker].dueDate.month = integerChecker;
                 break;
             }
 
-        }while(true);
+        }
+        while(true);
 
         do
         {
             printf("Year: ");
             scanf("%s", &stringYear);
             integerChecker = validateInteger(stringYear);
-            if(integerChecker != 0){
+            if(integerChecker != 0)
+            {
                 tasks[checker].dueDate.year = integerChecker;
                 break;
             }
 
-        }while(true);
+        }
+        while(true);
         //Validate due date with 'validateDate' function
-        inputChecker = validateDate(tasks[checker].dueDate.month, tasks[checker].dueDate.day, tasks[checker].dueDate.year);
+        inputChecker = validateDate(tasks[checker].dueDate.day, tasks[checker].dueDate.month, tasks[checker].dueDate.year);
         if(inputChecker == true)
         {
             printf("%s\nThe due date is invalid, Please try to enter a valid date!\n%s", AC_RED, AC_WHITE);
         }
     }
     while(inputChecker);
+
+
     checker ++;
 }
 
-//'validateDate'function use to validate due date
-bool validateDate(month, day, year)
+//'addMultiTasksSupport' function is used to receive multiple task details at once
+void addMultiTasksSupport(int numberTasks)
 {
-    static bool inputChecker = true;
-    static bool leap;
+    for(int i = 0; i < numberTasks; i++)
+    {
+        addTask();
+    }
+}
+
+//'validateDate' function use to validate due date
+bool validateDate(day, month, year)
+{
     //Get current time in seconds
     //This line declares a variable t of type time_t
     //and assigns it the current time in seconds since the Unix epoch (00:00:00 UTC on 1 January 1900)
@@ -361,207 +372,296 @@ bool validateDate(month, day, year)
     //printf("\nCurrent Date and Time: %02d/%02d/%04d\n", currentTime->tm_mday, currentTime->tm_mon + 1, currentTime->tm_year + 1900);
 
     //Checking if the user due date is valid
-    if(month >= currentTime->tm_mon + 1 && day >= currentTime->tm_mday && year >= currentTime->tm_year + 1900)
+    //year validation
+    if(year > currentTime->tm_year + 1900)
     {
-        //check if a year is a leap year or not
-        if(year % 4 == 0)
+        return validateDateSupport(day, month, year);
+    }
+    else if(month > currentTime->tm_mon + 1 && year == currentTime->tm_year + 1900)
+    {
+        return validateDateSupport(day, month, year);
+    }
+    else if(day >= currentTime->tm_mday && month == currentTime->tm_mon + 1 && year == currentTime->tm_year + 1900)
+    {
+        return validateDateSupport(day, month, year);
+    }
+    else return true;
+
+}
+
+//Support validateDate
+bool validateDateSupport(day, month, year)
+{
+
+    static bool leap;
+    static bool inputChecker = true;
+    //check if a year is a leap year or not
+    if(year % 4 == 0)
+    {
+        if((year % 100 == 0) && (year % 400 == 0))
         {
-            if((year % 100 == 0) && (year % 400 == 0))
-            {
-                leap = true;
-            }
-            else if((year % 100 == 0) && (year % 400 != 0))
-            {
-                leap = false;
-            }
-            else leap = true;
+            leap = true;
         }
-        else leap = false;
-
-        //month validation
-        if(month >= 1 && month <= 12)
+        else if((year % 100 == 0) && (year % 400 != 0))
         {
-            inputChecker = false;
+            leap = false;
         }
-        else inputChecker = true;
+        else leap = true;
+    }
+    else leap = false;
 
-        //day validation
-        if(day >= 1 && day <= 31)
-        {
-            if(leap == true)
-            {
-                if(month == 2)
-                {
-                    if(day <= 29)
-                    {
-                        inputChecker = false;
-                    }
-                    else inputChecker = true;
-
-                }
-                else if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10  || month == 12)
-                {
-                    if(day <= 31)
-                    {
-                        inputChecker = false;
-                    }
-                    else inputChecker = true;
-
-                }
-                else if (month == 4 || month == 6 || month == 9 || month == 11)
-                {
-                    if(day <= 30)
-                    {
-                        inputChecker = false;
-                    }
-                    else inputChecker = true;
-                }
-            }
-            else
-            {
-                if(month == 2)
-                {
-                    if(day <= 28)
-                    {
-                        inputChecker = false;
-                    }
-                    else inputChecker = true;
-
-                }
-                else if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10  || month == 12)
-                {
-                    if(day <= 31)
-                    {
-                        inputChecker = false;
-                    }
-                    else inputChecker = true;
-
-                }
-                else if (month == 4 || month == 6 || month == 9 || month == 11)
-                {
-                    if(day <= 30)
-                    {
-                        inputChecker = false;
-                    }
-                    else inputChecker = true;
-                }
-            }
-
-        }
-        else inputChecker = true;
-
+    //month validation
+    if(month >= 1 && month <= 12)
+    {
+        inputChecker = false;
     }
     else inputChecker = true;
 
+    //day validation
+    if(day >= 1 && day <= 31)
+    {
+        if(leap == true)
+        {
+            if(month == 2)
+            {
+                if(day <= 29)
+                {
+                    inputChecker = false;
+                }
+                else inputChecker = true;
+
+            }
+            else if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10  || month == 12)
+            {
+                if(day <= 31)
+                {
+                    inputChecker = false;
+                }
+                else inputChecker = true;
+
+            }
+            else if (month == 4 || month == 6 || month == 9 || month == 11)
+            {
+                if(day <= 30)
+                {
+                    inputChecker = false;
+                }
+                else inputChecker = true;
+            }
+        }
+        else
+        {
+            if(month == 2)
+            {
+                if(day <= 28)
+                {
+                    inputChecker = false;
+                }
+                else inputChecker = true;
+
+            }
+            else if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10  || month == 12)
+            {
+                if(day <= 31)
+                {
+                    inputChecker = false;
+                }
+                else inputChecker = true;
+
+            }
+            else if (month == 4 || month == 6 || month == 9 || month == 11)
+            {
+                if(day <= 30)
+                {
+                    inputChecker = false;
+                }
+                else inputChecker = true;
+            }
+        }
+
+    }
+    else inputChecker = true;
     return inputChecker;
 
 }
 
-//The 'displayTask' function is used to display tasks details at once or applying a filter
-void displayTask(int checker, task tasks[])
+//'display' function is used to control display process flow
+void display()
 {
-
+    if(checker == 0)
+    {
+        printf("%s\nOops! There is no task to display!\n%s", AC_RED, AC_WHITE);
+    }
+    else displayOption();
+}
+//'displayOption' function to get user choice
+void displayOption()
+{
     printf("\n---------------------------------------------------");
     printf("\n------ Welcome! to the display task section -------\n");
 
     //Filter section
-    char filter[6];
-    char priorityFilter[4];
+    char option[6];
+    char filter;
     do
     {
         printf("\nDo you want to show all tasks or use a filter?");
         printf("\nType 'filter' to apply a filter,\nor 'skip' to see all tasks: ");
-        scanf("%s", &filter);
-        if(strcmp(strupr(filter), "FILTER") != 0 && strcmp(strupr(filter), "SKIP") != 0)
+        scanf("%s", &option);
+        if(strcmp(strupr(option), "FILTER") != 0 && strcmp(strupr(option), "SKIP") != 0)
         {
-
             printf("%s\nOops! Enter a valid value!\n%s", AC_RED, AC_WHITE);
-
         }
     }
-    while( strcmp(strupr(filter), "FILTER") != 0 && strcmp(strupr(filter), "SKIP") != 0 );
+    while(strcmp(option, "FILTER") != 0 && strcmp(option, "SKIP") != 0);
 
-    if(strcmp(strupr(filter), "SKIP") == 0)
+    if(strcmp(option, "SKIP") == 0)
     {
-
         for(int i = 0; i < checker; i++)
         {
-
             printf("\n------------------- Task Number %d -----------------\n", i + 1);
-
             printf("\nThis task title: %s", tasks[i].title);
             printf("\n%s\'s description: %s", tasks[i].title, tasks[i].description);
+            printf("\n%s\'s status: %s", tasks[i].title, tasks[i].status);
             printf("\n%s\'s priority: %s", tasks[i].title, tasks[i].priority);
-            printf("\n%s\'s due date: %d-%d-%d\n", tasks[i].title, tasks[i].dueDate.day, tasks[i].dueDate.month, tasks[i].dueDate.year);
-
+            printf("\n%s\'s due date: %02d-%02d-%d\n", tasks[i].title, tasks[i].dueDate.day, tasks[i].dueDate.month, tasks[i].dueDate.year);
         }
-
     }
     else
     {
-
         do
         {
-            printf("\nCurrently, filtering is available by priority only!!\n");
-            printf("\nType 'high' to display only high-priority tasks,\nor 'low' to show only low-priority tasks: ");
-            scanf("%s", &priorityFilter);
-            if(strcmp(strupr(priorityFilter), "HIGH") != 0 && strcmp(strupr(priorityFilter), "LOW") != 0)
+            printf("\nType 'p' to filter by 'priority',\nor 's' to filter by 'status': ");
+            scanf("%s", &filter);
+            filter = toupper(filter);
+            if(filter != 'P' && filter != 'S')
             {
-
                 printf("%s\nOops! Enter a valid value!\n%s", AC_RED, AC_WHITE);
-
+            }
+            else
+            {
+                filterSupport(filter);
+                break;
             }
         }
-        while( strcmp(strupr(priorityFilter), "HIGH") != 0 && strcmp(strupr(priorityFilter), "LOW") != 0 );
-
-        if(strcmp(strupr(priorityFilter), "HIGH") == 0)
+        while(true);
+    }
+}
+//'filterSupport' function to filter outputs
+void filterSupport(char filter)
+{
+    static char priority;
+    static char status;
+    static int displayCounter = 0;
+    if(filter == 'P')
+    {
+        do
         {
+            printf("\nFiltering by priority");
+            printf("\nType 'h' to display only high-priority tasks,\nor 'l' to show only low-priority tasks: ");
+            scanf("%s", &priority);
+            priority = toupper(priority);
+            if(priority != 'H' && priority != 'L')
+            {
+                printf("%s\nOops! Enter a valid value!\n%s", AC_RED, AC_WHITE);
+            }
+            else break;
+        }
+        while(true);
 
+        if(priority == 'H')
+        {
             for(int i = 0; i < checker; i++)
             {
                 if (strcmp(tasks[i].priority, "HIGH") == 0)
                 {
-
-
-                    printf("\n------------------- Task Number %d -----------------\n", i + 1);
-
-                    printf("\nThis task title: %s", tasks[i].title);
-                    printf("\n%s\'s description: %s", tasks[i].title, tasks[i].description);
-                    printf("\n%s\'s priority: %s", tasks[i].title, tasks[i].priority);
-                    printf("\n%s\'s due date: %d-%d-%d\n", tasks[i].title, tasks[i].dueDate.day, tasks[i].dueDate.month, tasks[i].dueDate.year);
-
+                    displayTask(i);
+                    displayCounter++;
                 }
+            }
+            if(displayCounter == 0){
+
+                printf("\n%sThere is no task with higher priority!%s\n", AC_RED, AC_WHITE);
 
             }
-
         }
-        else
+        else if(priority == 'L')
         {
-
-
             for(int i = 0; i < checker; i++)
             {
                 if (strcmp(tasks[i].priority, "LOW") == 0)
                 {
-
-
-                    printf("\n------------------- Task Number %d -----------------\n", i + 1);
-
-                    printf("\nThis task title: %s", tasks[i].title);
-                    printf("\n%s\'s description: %s", tasks[i].title, tasks[i].description);
-                    printf("\n%s\'s priority: %s", tasks[i].title, tasks[i].priority);
-                    printf("\n%s\'s due date: %d-%d-%d\n", tasks[i].title, tasks[i].dueDate.day, tasks[i].dueDate.month, tasks[i].dueDate.year);
-
+                    displayTask(i);
+                    displayCounter++;
                 }
+            }
+            if(displayCounter == 0){
+                printf("\n%sThere is no task with lower priority!%s\n", AC_RED, AC_WHITE);
 
             }
-
         }
-
     }
+    else
+    {
+        do
+        {
+            printf("\nFiltering by status");
+            printf("\nType 'c' to display only completed tasks,\nor 'i' to show only incomplete tasks: ");
+            scanf("%s", &status);
+            status = toupper(status);
+            if(status != 'C' && status != 'I')
+            {
+                printf("%s\nOops! Enter a valid value!\n%s", AC_RED, AC_WHITE);
+            }
+            else break;
+        }
+        while(true);
 
+        if(status == 'C')
+        {
+            for(int i = 0; i < checker; i++)
+            {
+                if (strcmp(tasks[i].status, "COMPLETE") == 0)
+                {
+                    displayTask(i);
+                    displayCounter++;
+                }
+            }
+            if(displayCounter == 0){
+
+                printf("\n%sThere is no task with complete status!%s\n", AC_RED, AC_WHITE);
+
+            }
+        }
+        else if(status == 'I')
+        {
+            for(int i = 0; i < checker; i++)
+            {
+                if (strcmp(tasks[i].status, "INCOMPLETE") == 0)
+                {
+                    displayTask(i);
+                    displayCounter++;
+                }
+            }
+            if(displayCounter == 0){
+
+                printf("\n%sThere is no task with incomplete status!%s\n", AC_RED, AC_WHITE);
+
+            }
+        }
+    }
 }
+//'displayTask' function to display outputs
+void displayTask(int i)
+{
+    printf("\n------------------- Task Number %d -----------------\n", i + 1);
 
+    printf("\nThis task title: %s", tasks[i].title);
+    printf("\n%s\'s description: %s", tasks[i].title, tasks[i].description);
+    printf("\n%s\'s status: %s", tasks[i].title, tasks[i].status);
+    printf("\n%s\'s priority: %s", tasks[i].title, tasks[i].priority);
+    printf("\n%s\'s due date: %02d-%02d-%d\n", tasks[i].title, tasks[i].dueDate.day, tasks[i].dueDate.month, tasks[i].dueDate.year);
+}
 
 //The 'updateTask' function is used to update tasks details
 void updateTask(int checker, task tasks[])
@@ -581,7 +681,7 @@ void updateTask(int checker, task tasks[])
         if(taskNumber == 0)
         {
 
-            displayTask(checker, tasks);
+            displayTask(checker);
 
         }
 
@@ -683,7 +783,7 @@ void deleteTask(int checker, task tasks[])
     if (remember == 0)
     {
 
-        displayTask(checker, tasks);
+        displayTask(checker);
 
     }
     else
